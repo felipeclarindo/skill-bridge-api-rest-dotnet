@@ -1,11 +1,11 @@
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using DotNetEnv;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using WebApi.Database;
-using WebApi.Repositories.Interfaces;
 using WebApi.Repositories;
+using WebApi.Repositories.Interfaces;
 
 // ==================================================
 // CRIA O BUILDER
@@ -19,7 +19,9 @@ if (builder.Environment.IsDevelopment())
 {
     Console.WriteLine("[DEV] Carregando .env da raiz...");
 
-    var root = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+    var root = Directory
+        .GetParent(AppContext.BaseDirectory)!
+        .Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
     var envPath = Path.Combine(root, ".env");
 
     Console.WriteLine($"[DEV] Caminho .env: {envPath}");
@@ -66,7 +68,8 @@ Console.WriteLine("✅ ORACLE_DB carregada com sucesso!");
 // DB CONTEXT (WITH ORACLE)
 // ==================================================
 builder.Services.AddDbContext<SkillBridgeContext>(options =>
-    options.UseOracle(oracleConnectionString));
+    options.UseOracle(oracleConnectionString)
+);
 
 // ==================================================
 // DEPENDENCY INJECTION
@@ -98,7 +101,8 @@ builder.Services.AddControllers();
 // ==================================================
 // HEALTHCHECK (NÃO QUEBRA A API SE O ORACLE CAIR)
 // ==================================================
-builder.Services.AddHealthChecks()
+builder
+    .Services.AddHealthChecks()
     .AddOracle(
         oracleConnectionString,
         name: "oracle",

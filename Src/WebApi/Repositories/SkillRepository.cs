@@ -8,13 +8,12 @@ namespace WebApi.Repositories;
 public class SkillRepository : ISkillRepository
 {
     private readonly SkillBridgeContext _db;
+
     public SkillRepository(SkillBridgeContext db) => _db = db;
 
-    public async Task<IEnumerable<Skill>> GetAllAsync()
-        => await _db.Skills.ToListAsync();
+    public async Task<IEnumerable<Skill>> GetAllAsync() => await _db.Skills.ToListAsync();
 
-    public async Task<Skill?> GetByIdAsync(int id)
-        => await _db.Skills.FindAsync(id);
+    public async Task<Skill?> GetByIdAsync(int id) => await _db.Skills.FindAsync(id);
 
     public async Task<Skill> CreateAsync(Skill skill)
     {
@@ -32,7 +31,8 @@ public class SkillRepository : ISkillRepository
     public async Task DeleteAsync(int id)
     {
         var entity = await _db.Skills.FindAsync(id);
-        if (entity == null) return;
+        if (entity == null)
+            return;
         _db.Skills.Remove(entity);
         await _db.SaveChangesAsync();
     }

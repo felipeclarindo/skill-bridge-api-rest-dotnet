@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
-using WebApi.Repositories.Interfaces; 
+using WebApi.Repositories.Interfaces;
 
 namespace WebApi.Controllers.v1
 {
@@ -40,7 +40,8 @@ namespace WebApi.Controllers.v1
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, Recommendation model)
         {
-            if (id != model.Id) return BadRequest();
+            if (id != model.Id)
+                return BadRequest();
 
             await _repository.UpdateAsync(model);
             return NoContent();

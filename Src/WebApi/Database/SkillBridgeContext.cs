@@ -5,7 +5,8 @@ namespace WebApi.Database;
 
 public class SkillBridgeContext : DbContext
 {
-    public SkillBridgeContext(DbContextOptions<SkillBridgeContext> options) : base(options) { }
+    public SkillBridgeContext(DbContextOptions<SkillBridgeContext> options)
+        : base(options) { }
 
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Skill> Skills { get; set; }
@@ -18,12 +19,14 @@ public class SkillBridgeContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Join table config
-        modelBuilder.Entity<UserSkill>()
+        modelBuilder
+            .Entity<UserSkill>()
             .HasOne(us => us.Usuario)
             .WithMany(u => u.UserSkills)
             .HasForeignKey(us => us.UsuarioId);
 
-        modelBuilder.Entity<UserSkill>()
+        modelBuilder
+            .Entity<UserSkill>()
             .HasOne(us => us.Skill)
             .WithMany(s => s.UserSkills)
             .HasForeignKey(us => us.SkillId);

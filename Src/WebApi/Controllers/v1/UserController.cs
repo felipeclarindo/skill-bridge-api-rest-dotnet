@@ -10,14 +10,18 @@ namespace WebApi.Controllers.v1;
 public class UserController : ControllerBase
 {
     private readonly IUserRepository _repo;
+
     public UserController(IUserRepository repo) => _repo = repo;
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var items = (await _repo.GetAllAsync()).Select(u => new {
-            u.Id, u.Nome, u.Email,
-            _links = new { self = $"/api/v1/users/{u.Id}" }
+        var items = (await _repo.GetAllAsync()).Select(u => new
+        {
+            u.Id,
+            u.Nome,
+            u.Email,
+            _links = new { self = $"/api/v1/users/{u.Id}" },
         });
         return Ok(items);
     }
@@ -26,8 +30,17 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetById(int id)
     {
         var item = await _repo.GetByIdAsync(id);
-        if (item == null) return NotFound();
-        return Ok(new { item.Id, item.Nome, item.Email, _links = new { self = $"/api/v1/users/{item.Id}" } });
+        if (item == null)
+            return NotFound();
+        return Ok(
+            new
+            {
+                item.Id,
+                item.Nome,
+                item.Email,
+                _links = new { self = $"/api/v1/users/{item.Id}" },
+            }
+        );
     }
 
     [HttpPost]
@@ -41,7 +54,8 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Update(int id, Usuario model)
     {
         var existing = await _repo.GetByIdAsync(id);
-        if (existing == null) return NotFound();
+        if (existing == null)
+            return NotFound();
         existing.Nome = model.Nome;
         existing.Email = model.Email;
         await _repo.UpdateAsync(existing);
