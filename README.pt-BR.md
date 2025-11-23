@@ -97,11 +97,9 @@ dotnet run
 
 - <http://localhost:5272/api>
 
-8. Para executar os testes, utilize o comando abaixo:
+8. Para executar os testes, abra o terminal na raiz do projeto e utilize o comando abaixo:
 
 ```bash
-cd ..
-cd ..
 dotnet test
 ```
 

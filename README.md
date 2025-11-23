@@ -97,11 +97,9 @@ dotnet run
 
 - <http://localhost:5272/api/v1>
 
-8. To run the tests, execute the commands bellow:
+8. To run the tests, execute the command bellow in the root path:
 
 ```bash
-cd ..
-cd ..
 dotnet test
 ```
 
