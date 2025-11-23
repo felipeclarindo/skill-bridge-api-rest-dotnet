@@ -57,7 +57,7 @@ API RESTful desenvolvida com ASP.NET Core e OracleDB + EF Core para realizar a p
 (More and etc)
 
 - `GET api` - Get api description.
-- `GET healthchecks` - Get the healthchecks
+- `GET healthz` - Get the healthchecks
 
 ## Passos para rodar
 
@@ -102,6 +102,12 @@ dotnet run
 ```bash
 dotnet test
 ```
+
+## Equipe
+
+- RM: 554547 -> Felipe Gabriel Lopes Pinheiro Clarindo
+- RM: 558482 -> Humberto de Souza Silva
+- RM: 554914 -> Vinicius Beda de Oliveira
 
 ## Contribuição
 

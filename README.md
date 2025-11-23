@@ -57,7 +57,7 @@ API REST developed as ASP.NET Core and OracleDB + EF Core to make persistense in
 (More and etc)
 
 - `GET api` - Get api description.
-- `GET healthchecks` - Get the healthchecks.
+- `GET healthz` - Get the healthchecks.
 
 ## Steps to run
 
@@ -102,6 +102,12 @@ dotnet run
 ```bash
 dotnet test
 ```
+
+## Team
+
+- RM: 554547 -> Felipe Gabriel Lopes Pinheiro Clarindo
+- RM: 558482 -> Humberto de Souza Silva
+- RM: 554914 -> Vinicius Beda de Oliveira
 
 ## Contribution
 
