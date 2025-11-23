@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Models;
 
 namespace WebApi.Controllers
 {
@@ -9,15 +10,16 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetApiDescription()
         {
-            var info = new
+            var info = new ApiDescription
             {
-                name = "SkillBridge API",
-                version = "1.0.0",
-                status = "Online",
-                desenvolvedor = "Felipe Clarindo",
-                github = "https://github.com/felipeclarindo",
-                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
-                timestamp = DateTime.UtcNow
+                Name = "SkillBridge API",
+                Version = "1.0.0",
+                Status = "Online",
+                Desenvolvedor = "Felipe Clarindo",
+                Github = "https://github.com/felipeclarindo",
+                Environment =
+                    Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown",
+                Timestamp = DateTime.UtcNow,
             };
 
             return Ok(info);

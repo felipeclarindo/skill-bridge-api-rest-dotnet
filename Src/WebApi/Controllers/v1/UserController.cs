@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Models;
+using WebApi.Models.Dto;
 using WebApi.Repositories.Interfaces;
 
 namespace WebApi.Controllers.v1;
@@ -32,6 +33,7 @@ public class UserController : ControllerBase
         var item = await _repo.GetByIdAsync(id);
         if (item == null)
             return NotFound();
+
         return Ok(
             new
             {
@@ -44,20 +46,53 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Usuario model)
+    public async Task<IActionResult> Create([FromBody] UsuarioCreateDto modelDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        // Map DTO para model EF
+        var model = new Usuario
+        {
+            Nome = modelDto.Nome,
+            Email = modelDto.Email,
+            UserSkills = modelDto
+                .UserSkills.Select(usDto => new UserSkill
+                {
+                    UsuarioId = usDto.UsuarioId,
+                    SkillId = usDto.SkillId,
+                })
+                .ToList(),
+        };
+
         var created = await _repo.CreateAsync(model);
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, Usuario model)
+    public async Task<IActionResult> Update(int id, [FromBody] UsuarioCreateDto modelDto)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var existing = await _repo.GetByIdAsync(id);
         if (existing == null)
             return NotFound();
-        existing.Nome = model.Nome;
-        existing.Email = model.Email;
+
+        // Atualiza campos básicos
+        existing.Nome = modelDto.Nome;
+        existing.Email = modelDto.Email;
+
+        // Atualiza UserSkills
+        existing.UserSkills.Clear();
+        existing.UserSkills = modelDto
+            .UserSkills.Select(usDto => new UserSkill
+            {
+                UsuarioId = usDto.UsuarioId,
+                SkillId = usDto.SkillId,
+            })
+            .ToList();
+
         await _repo.UpdateAsync(existing);
         return NoContent();
     }

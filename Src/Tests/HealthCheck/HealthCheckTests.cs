@@ -1,7 +1,7 @@
 using System.Net;
 using System.Threading.Tasks;
-using Xunit;
 using FluentAssertions;
+using Xunit;
 
 namespace Tests.HealthCheck
 {
@@ -29,7 +29,9 @@ namespace Tests.HealthCheck
             var body = await response.Content.ReadAsStringAsync();
 
             // Verifica que contém "Healthy" ou "OK"
-            (body.Contains("Healthy") || body.Contains("OK")).Should().BeTrue();
+            (body.Contains("Healthy") || body.Contains("OK"))
+                .Should()
+                .BeTrue();
         }
     }
 }
