@@ -7,24 +7,37 @@ using WebApi.Database;
 using WebApi.Repositories.Interfaces;
 using WebApi.Repositories;
 
-// ========================================
-// LOAD .ENV (que está na raiz do projeto)
-// ========================================
-
-// Caminho absoluto até a pasta raiz
-var projectRoot = Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.FullName;
-var envFile = Path.Combine(projectRoot, ".env");
-
-Console.WriteLine($"[ENV] Carregando arquivo: {envFile}");
-
-// Carrega o arquivo .env
-Env.Load(envFile);
-
+// ==================================================
+// CRIA O BUILDER
+// ==================================================
 var builder = WebApplication.CreateBuilder(args);
 
-// ========================================
-// LOGGING (Serilog)
-// ========================================
+// ==================================================
+// CARREGA .ENV APENAS EM DESENVOLVIMENTO
+// ==================================================
+if (builder.Environment.IsDevelopment())
+{
+    Console.WriteLine("[DEV] Carregando .env da raiz...");
+
+    var root = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.Parent!.Parent!.FullName;
+    var envPath = Path.Combine(root, ".env");
+
+    Console.WriteLine($"[DEV] Caminho .env: {envPath}");
+
+    if (File.Exists(envPath))
+        Env.Load(envPath);
+    else
+        Console.WriteLine("[DEV] ⚠️ Arquivo .env não encontrado!");
+}
+
+// ==================================================
+// GARANTE LEITURA DAS VARIÁVEIS DO RENDER
+// ==================================================
+builder.Configuration.AddEnvironmentVariables();
+
+// ==================================================
+// LOGGING (SERILOG)
+// ==================================================
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
@@ -32,25 +45,32 @@ Log.Logger = new LoggerConfiguration()
 
 builder.Host.UseSerilog();
 
-// ========================================
-// ORACLE CONNECTION
-// ========================================
+// ==================================================
+// CARREGA STRING DE CONEXÃO ORACLE
+// ==================================================
+var rawOracle = Environment.GetEnvironmentVariable("ORACLE_DB");
 
-var oracleConnectionString = Environment.GetEnvironmentVariable("ORACLE_DB");
-
-if (string.IsNullOrEmpty(oracleConnectionString))
+// Se vier null → falha imediatamente
+if (string.IsNullOrWhiteSpace(rawOracle))
 {
-    throw new Exception("❌ ERRO: A variável de ambiente ORACLE_DB não foi carregada do arquivo .env. Verifique o .env na raiz do projeto.");
+    Console.WriteLine("❌ ERRO FATAL: Variável ORACLE_DB não encontrada!");
+    throw new Exception("Variável de ambiente ORACLE_DB não definida.");
 }
 
-// DbContext com Oracle
+// Ajusta possíveis '\n' enviados literalmente pelo Render
+var oracleConnectionString = rawOracle.Replace("\\n", "\n");
+
+Console.WriteLine("✅ ORACLE_DB carregada com sucesso!");
+
+// ==================================================
+// DB CONTEXT (WITH ORACLE)
+// ==================================================
 builder.Services.AddDbContext<SkillBridgeContext>(options =>
     options.UseOracle(oracleConnectionString));
 
-
-// ========================================
+// ==================================================
 // DEPENDENCY INJECTION
-// ========================================
+// ==================================================
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
@@ -58,9 +78,9 @@ builder.Services.AddScoped<IWorkRepository, WorkRepository>();
 builder.Services.AddScoped<ILearningPathRepository, LearningPathRepository>();
 builder.Services.AddScoped<IRecommendationRepository, RecommendationRepository>();
 
-// ========================================
-// API VERSIONING
-// ========================================
+// ==================================================
+// VERSIONAMENTO
+// ==================================================
 builder.Services.AddApiVersioning(options =>
 {
     options.AssumeDefaultVersionWhenUnspecified = true;
@@ -68,32 +88,32 @@ builder.Services.AddApiVersioning(options =>
     options.ReportApiVersions = true;
 });
 
-// ========================================
-// SWAGGER
-// ========================================
-builder.Services.AddControllers();
+// ==================================================
+// SWAGGER (AGORA FUNCIONA EM PRODUÇÃO)
+// ==================================================
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
 
-// ========================================
-// HEALTHCHECKS ORACLE
-// ========================================
+// ==================================================
+// HEALTHCHECK (NÃO QUEBRA A API SE O ORACLE CAIR)
+// ==================================================
 builder.Services.AddHealthChecks()
     .AddOracle(
         oracleConnectionString,
         name: "oracle",
-        failureStatus: HealthStatus.Unhealthy
+        failureStatus: HealthStatus.Degraded // evita travar swagger
     );
 
+// ==================================================
+// APP
+// ==================================================
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseRouting();
 app.UseAuthorization();
